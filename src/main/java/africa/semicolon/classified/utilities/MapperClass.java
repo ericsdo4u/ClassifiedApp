@@ -2,12 +2,13 @@ package africa.semicolon.classified.utilities;
 
 import africa.semicolon.classified.data.model.Post;
 import africa.semicolon.classified.data.model.User;
+import africa.semicolon.classified.data.model.View;
 import africa.semicolon.classified.dtos.PostRequest;
 import africa.semicolon.classified.dtos.RegisterRequest;
-import africa.semicolon.classified.response.PostReturnResponse;
+import africa.semicolon.classified.response.PostResponse;
 import africa.semicolon.classified.response.RegisterResponse;
-import africa.semicolon.classified.dtos.LogOutRequest;
-import africa.semicolon.classified.dtos.LoginRequest;
+import africa.semicolon.classified.dtos.ViewRequest;
+import africa.semicolon.classified.response.ViewResponse;
 
 import java.time.format.DateTimeFormatter;
 
@@ -27,33 +28,35 @@ public class MapperClass {
         registerResponse.setDateCreated(DateTimeFormatter.ofPattern("dd/MM/yyyy 'at' HH:mm:ss a").format(user.getDateCreated()));
         return registerResponse;
     }
-    public static User mapLoginResponse(LoginRequest loginRequest){
-        User user = new User();
-        user.setUsername(loginRequest.getUsername());
-        user.setPassword(loginRequest.getPassword());
-        return user;
-    }
-    public static User mapLogOutResponse(LogOutRequest logOutRequest){
-        User user = new User();
-        user.setUsername(logOutRequest.getUsername());
-        user.setPassword(logOutRequest.getPassword());
-        return user;
-    }
-    public static Post mapPostAds(PostRequest postRequest){
-        Post post = new Post();
+    public static africa.semicolon.classified.data.model.Post mapPostAds(PostRequest postRequest){
+        africa.semicolon.classified.data.model.Post post = new africa.semicolon.classified.data.model.Post();
+        post.setUsername(postRequest.getUsername());
         post.setTitle(postRequest.getTitle());
-        post.setContent(postRequest.getContent());
-        post.setAuthor(postRequest.getAuthor());
+        post.setDetail(postRequest.getDetail());
+        post.setSeller(postRequest.getSeller());
+        post.setPrice(postRequest.getPrice());
         return post;
     }
-    public static PostReturnResponse mapPostReturnMessage(Post post){
-        PostReturnResponse postReturnResponse = new PostReturnResponse();
+    public static PostResponse mapPostReturnMessage(Post post){
+        PostResponse postReturnResponse = new PostResponse();
         postReturnResponse.setTitle(post.getTitle());
-        postReturnResponse.setContent(post.getContent());
+        postReturnResponse.setDetail(post.getDetail());
         postReturnResponse.setId(post.getId());
-        postReturnResponse.setAuthor(post.getAuthor());
+        postReturnResponse.setSeller(post.getSeller());
+        postReturnResponse.setPrice(post.getPrice());
         postReturnResponse.setPostedAt(DateTimeFormatter.ofPattern("dd/MM/yyyy 'at' HH:mm:ss a").format(post.getCreatedAt()));
         return postReturnResponse;
+    }
+    public static View mapView(ViewRequest request){
+        View view = new View();
+        view.setUsername(request.getUsername());
+        return view;
+    }
+    public static ViewResponse mapViewResponse(View view){
+        ViewResponse viewResponse = new ViewResponse();
+        viewResponse.setUsername(view.getUsername());
+        viewResponse.setTimeOfView(DateTimeFormatter.ofPattern("dd/MM/yyyy 'at' HH:mm:ss a").format(view.getTimeOfView()));
+        return viewResponse;
     }
     public static boolean isPasswordIncorrect(User foundUser, String password) {
         return !foundUser.getPassword().equals(password);

@@ -5,6 +5,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Document
-public class DeleteReturnResponse {
+public class DeleteResponse {
     private String message;
 }

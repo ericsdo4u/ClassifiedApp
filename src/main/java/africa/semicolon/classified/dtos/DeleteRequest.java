@@ -8,5 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class DeleteRequest {
     private String username;
     private String id;
-    private String author;
+    private String content;
+
 }

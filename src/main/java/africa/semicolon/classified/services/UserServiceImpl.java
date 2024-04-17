@@ -9,7 +9,7 @@ import africa.semicolon.classified.dtos.RegisterRequest;
 import africa.semicolon.classified.exceptions.IncorrectPasswordException;
 import africa.semicolon.classified.exceptions.UserAlreadyExistException;
 import africa.semicolon.classified.exceptions.UserNotFoundException;
-import africa.semicolon.classified.response.DeleteReturnResponse;
+import africa.semicolon.classified.response.DeleteResponse;
 import africa.semicolon.classified.response.LogOutResponse;
 import africa.semicolon.classified.response.LoginResponse;
 import africa.semicolon.classified.response.RegisterResponse;
@@ -17,7 +17,11 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 import static africa.semicolon.classified.utilities.MapperClass.*;
+
+
 @AllArgsConstructor
 @Service
 public class UserServiceImpl implements UserService{
@@ -26,46 +30,44 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public RegisterResponse register(RegisterRequest registerRequest) {
-        if (registerRequest.getUsername().isBlank() || registerRequest.getPassword().isBlank()){
+        if (registerRequest.getUsername().toLowerCase().isBlank() || registerRequest.getPassword().toLowerCase().isBlank()){
             throw new IllegalArgumentException("username or password cannot be empty");
         }
-        validateUser(registerRequest.getUsername());
+        validateUser(registerRequest.getUsername().toLowerCase());
         User newUser = map(registerRequest);
         User saveUser = userRepository.save(newUser);
         return mapRegResponse(saveUser);
     }
-
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
-        User foundUser = mapLoginResponse(loginRequest);
-        User userFound = userRepository.findByUsername(foundUser.getUsername().toLowerCase());
-        if (isPasswordIncorrect(userFound, loginRequest.getPassword())) {
+        User foundUser = userRepository.findByUsername(loginRequest.getUsername().toLowerCase());
+        if (isPasswordIncorrect(foundUser, loginRequest.getPassword().toLowerCase())) {
             throw new IncorrectPasswordException("username or password incorrect");
         }
-        userFound.setLocked(false);
-        userRepository.save(userFound);
+        foundUser.setLocked(false);
+        userRepository.save(foundUser);
         LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setMessage("Successfully login");
+        loginResponse.setMessage("Successfully logged-in");
         return loginResponse;
     }
     @Override
     public LogOutResponse logOut(LogOutRequest logOutRequest){
-        User setFoundUser = mapLogOutResponse(logOutRequest);
-        User foundUser =  userRepository.findByUsername(setFoundUser.getUsername());
+        User foundUser =  userRepository.findByUsername(logOutRequest.getUsername().toLowerCase());
         foundUser.setLocked(true);
         userRepository.save(foundUser);
         LogOutResponse logOutResponse = new LogOutResponse();
-        logOutResponse.setMessage("logout is successful");
+        logOutResponse.setMessage("successful logged-out");
         return logOutResponse;
     }
     @Override
-    public DeleteReturnResponse deleteByUsername(DeleteRequest deleteRequest) {
-        User foundUser =  userRepository.findByUsername(deleteRequest.getUsername());
+    public DeleteResponse deleteByUsername(DeleteRequest deleteRequest) {
+        User foundUser =  userRepository.findByUsername(deleteRequest.getUsername().toLowerCase());
         if (foundUser == null){
             throw new UserNotFoundException("user not found");
         }
+        checkAccountState(foundUser);
         userRepository.delete(foundUser);
-        DeleteReturnResponse response = new DeleteReturnResponse();
+        DeleteResponse response = new DeleteResponse();
         response.setMessage("User has been successfully deleted");
         return response;
     }
@@ -73,9 +75,18 @@ public class UserServiceImpl implements UserService{
     public long getNumberOfRegisteredUsers() {
         return userRepository.count();
     }
-    private void validateUser(String username) {
-        var foundUser = userRepository.findById(username);
-        if (foundUser.isPresent())
-            throw new UserAlreadyExistException("user already registered, login");
+    public void validateUser(String username) {
+        Optional<User> user = userRepository.findUserByUsername(username.toLowerCase());
+        if (user.isPresent())
+           throw new UserAlreadyExistException("user already registered, login instead");
+    }
+    public static void checkAccountState(User user){
+        if (user.isLocked())
+            throw new IllegalArgumentException("please login");
+    }
+    @Override
+    public void checkUser(String username) {
+        Optional<User> user = userRepository.findUserByUsername(username.toLowerCase());
+        if(user.isEmpty()) throw new UserNotFoundException("User not found");
     }
 }

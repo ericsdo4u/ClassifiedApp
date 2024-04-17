@@ -6,6 +6,7 @@ import africa.semicolon.classified.dtos.DeleteRequest;
 import africa.semicolon.classified.dtos.LogOutRequest;
 import africa.semicolon.classified.dtos.LoginRequest;
 import africa.semicolon.classified.dtos.RegisterRequest;
+import lombok.AllArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +21,11 @@ class UserServiceImplTest {
     private UserService userService;
     @Autowired
     private UserRepository userRepository;
+
+
     @BeforeEach
     public void setUp(){
-        userService = new UserServiceImpl(userRepository);
+        userRepository.deleteAll();
     }
     @Test
     public void registerOneUser_OneUserRegisteredTest(){

@@ -6,14 +6,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Document
+@Document("user-for-classified-ads")
 @Data
 public class User {
-    @Id
-    private String id;
+    private String email;
     private String username;
     private String password;
-    private String email;
+    @Id
+    private String id;
     private boolean locked;
     private LocalDateTime dateCreated = LocalDateTime.now();
 }
